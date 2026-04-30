@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../../core/services/storage/onboarding_storage_service.dart';
+import '../bloc/auth_bloc.dart';
+import '../bloc/auth_event.dart';
+import '../bloc/auth_state.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -35,10 +40,10 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
   Future<void> _navigateToNext() async {
     await Future.delayed(const Duration(milliseconds: AppConstants.splashDurationMs));
-    if (mounted) {
-      // TODO: Check if user is logged in, then route accordingly
-      context.goNamed(AppRoutes.onboarding);
-    }
+    if (!mounted) return;
+
+    // Check onboarding stage and route accordingly
+    context.read<AuthBloc>().add(AuthCheckOnboardingStage());
   }
 
   @override
@@ -49,36 +54,58 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: Center(
-        child: FadeTransition(
-          opacity: _fadeAnimation,
-          child: ScaleTransition(
-            scale: _scaleAnimation,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    borderRadius: BorderRadius.circular(24),
+    return BlocListener<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state is AuthOnboardingStageResolved) {
+          switch (state.stage) {
+            case OnboardingStage.none:
+              context.goNamed(AppRoutes.onboarding);
+              break;
+            case OnboardingStage.registered:
+              // User created account but hasn't set up profile
+              context.goNamed(AppRoutes.setupProfile);
+              break;
+            case OnboardingStage.profileSetup:
+              // User set up name but hasn't uploaded photo / finished
+              context.goNamed(AppRoutes.setupProfile);
+              break;
+            case OnboardingStage.completed:
+              context.goNamed(AppRoutes.dashboard);
+              break;
+          }
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: Center(
+          child: FadeTransition(
+            opacity: _fadeAnimation,
+            child: ScaleTransition(
+              scale: _scaleAnimation,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: const Icon(Icons.shield, size: 60, color: Colors.white),
                   ),
-                  child: const Icon(Icons.shield, size: 60, color: Colors.white),
-                ),
-                const SizedBox(height: 24),
-                const Text(
-                  AppStrings.appName,
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
-                    letterSpacing: 2,
+                  const SizedBox(height: 24),
+                  const Text(
+                    AppStrings.appName,
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                      letterSpacing: 2,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

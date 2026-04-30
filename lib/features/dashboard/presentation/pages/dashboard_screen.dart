@@ -8,11 +8,17 @@ import '../widgets/safety_status_indicator.dart';
 import '../widgets/ad_carousel_widget.dart';
 import '../widgets/bottom_nav_bar.dart';
 
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/di/injection.dart';
+import '../../../ads/presentation/bloc/ads_bloc.dart';
+import '../../../ads/presentation/bloc/ads_event.dart';
+
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
+
 
 class _DashboardScreenState extends State<DashboardScreen> {
   int _currentNavIndex = 0;
@@ -40,64 +46,68 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Top bar with avatar, greeting, and notification bell
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    radius: 22,
-                    backgroundColor: AppColors.primaryLight,
-                    child: const Icon(Icons.person, color: AppColors.primary),
-                  ),
-                  const SizedBox(width: 12),
-                  const Expanded(
-                    child: Text(
-                      '${AppStrings.welcome} Adenike',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
+    return BlocProvider(
+      create: (context) => sl<AdsBloc>()..add(AdsLoadRequested()),
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Top bar with avatar, greeting, and notification bell
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 22,
+                      backgroundColor: AppColors.primaryLight,
+                      child: const Icon(Icons.person, color: AppColors.primary),
                     ),
-                  ),
-                  IconButton(
-                    onPressed: () {},
-                    icon: const Icon(Icons.notifications_outlined, color: AppColors.textPrimary),
-                  ),
-                ],
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Text(
+                        '${AppStrings.welcome} Adenike',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {},
+                      icon: const Icon(Icons.notifications_outlined, color: AppColors.textPrimary),
+                    ),
+                  ],
+                ),
               ),
-            ),
 
-            // Safety status indicator
-            const Center(child: SafetyStatusIndicator(isSafe: true)),
-            const SizedBox(height: 20),
+              // Safety status indicator
+              const Center(child: SafetyStatusIndicator(isSafe: true)),
+              const SizedBox(height: 20),
 
-            // Ad carousel
-            const Padding(
-              padding: EdgeInsets.only(left: 20),
-              child: Text(AppStrings.advertisement,
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.textPrimary)),
-            ),
-            const SizedBox(height: 8),
-            const AdCarouselWidget(),
-            const SizedBox(height: 16),
-
-            // SOS Button
-            Expanded(
-              child: Center(
-                child: EmergencyButton(onPressed: _onSOSTapped),
+              // Ad carousel
+              const Padding(
+                padding: EdgeInsets.only(left: 20),
+                child: Text(AppStrings.advertisement,
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.textPrimary)),
               ),
-            ),
-          ],
+              const SizedBox(height: 8),
+              const AdCarouselWidget(),
+              const SizedBox(height: 16),
+
+              // SOS Button
+              Expanded(
+                child: Center(
+                  child: EmergencyButton(onPressed: _onSOSTapped),
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
-      bottomNavigationBar: BottomNavBar(
-        currentIndex: _currentNavIndex,
-        onTap: _onNavTap,
+        bottomNavigationBar: BottomNavBar(
+          currentIndex: _currentNavIndex,
+          onTap: _onNavTap,
+        ),
       ),
     );
   }
 }
+

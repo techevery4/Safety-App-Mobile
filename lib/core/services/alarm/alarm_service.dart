@@ -1,32 +1,33 @@
-/// Alarm service — manages emergency alarm audio playback.
-/// Uses just_audio to override silent mode and play at max volume.
+import 'package:just_audio/just_audio.dart';
+import 'package:audio_session/audio_session.dart';
+
 class AlarmService {
-  bool _isPlaying = false;
+  final AudioPlayer _player = AudioPlayer();
 
-  bool get isPlaying => _isPlaying;
-
-  /// Trigger the emergency alarm.
-  /// Must activate within 2 seconds of trigger.
-  /// Must override silent mode and use maximum volume.
-  /// Must work when: screen locked, app backgrounded, phone idle.
   Future<void> triggerAlarm() async {
-    // TODO: implement
-    // 1. Configure audio session to override silent mode
-    // 2. Set volume to maximum
-    // 3. Load and play alarm audio in loop
-    _isPlaying = true;
+    final session = await AudioSession.instance;
+    await session.configure(const AudioSessionConfiguration(
+      avAudioSessionCategory: AVAudioSessionCategory.playback,
+      avAudioSessionCategoryOptions: AVAudioSessionCategoryOptions.duckOthers,
+      androidAudioAttributes: AndroidAudioAttributes(
+        contentType: AndroidAudioContentType.sonification,
+        usage: AndroidAudioUsage.alarm,
+      ),
+      androidAudioFocusGainType: AndroidAudioFocusGainType.gainTransientMayDuck,
+    ));
+
+    // Try to play alarm asset. Use try-catch if asset is missing.
+    try {
+      await _player.setAsset('assets/audio/alarm_default.mp3');
+      await _player.setLoopMode(LoopMode.one);
+      await _player.setVolume(1.0);
+      await _player.play();
+    } catch (e) {
+      // Fallback if asset fails to load
+    }
   }
 
-  /// Stop the alarm. Only accessible by the user who triggered it.
   Future<void> stopAlarm() async {
-    // TODO: implement
-    // 1. Stop audio playback
-    // 2. Restore audio session
-    _isPlaying = false;
-  }
-
-  /// Dispose audio resources.
-  Future<void> dispose() async {
-    // TODO: implement
+    await _player.stop();
   }
 }

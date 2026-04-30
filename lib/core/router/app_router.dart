@@ -1,19 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'app_routes.dart';
+import '../di/injection.dart';
 import '../../features/auth/presentation/pages/splash_screen.dart';
 import '../../features/auth/presentation/pages/onboarding_screen.dart';
 import '../../features/auth/presentation/pages/register_screen.dart';
 import '../../features/auth/presentation/pages/otp_verification_screen.dart';
 import '../../features/auth/presentation/pages/setup_profile_screen.dart';
 import '../../features/auth/presentation/pages/login_screen.dart';
+import '../../features/auth/presentation/pages/forgot_password_screen.dart';
+import '../../features/auth/presentation/pages/forgot_password_success_screen.dart';
 import '../../features/dashboard/presentation/pages/dashboard_screen.dart';
 import '../../features/dashboard/presentation/pages/emergency_active_screen.dart';
 import '../../features/emergency/presentation/pages/emergency_triggered_screen.dart';
 import '../../features/contacts/presentation/pages/contacts_screen.dart';
 import '../../features/contacts/presentation/pages/add_contact_screen.dart';
+import '../../features/contacts/presentation/bloc/contacts_bloc.dart';
+import '../../features/contacts/presentation/bloc/contacts_event.dart';
+import '../../features/ads/presentation/pages/ad_manager_screen.dart';
+import '../../features/ads/presentation/bloc/ads_bloc.dart';
 import '../../features/location/presentation/pages/location_sharing_screen.dart';
 import '../../features/location/presentation/pages/shared_location_history_screen.dart';
+
 import '../../features/profile/presentation/pages/profile_screen.dart';
 import '../../features/settings/presentation/pages/settings_screen.dart';
 import '../../features/settings/presentation/pages/account_settings_screen.dart';
@@ -22,6 +31,9 @@ import '../../features/settings/presentation/pages/notification_settings_screen.
 import '../../features/settings/presentation/pages/privacy_settings_screen.dart';
 import '../../features/settings/presentation/pages/app_permissions_screen.dart';
 import '../../features/settings/presentation/pages/about_screen.dart';
+import '../../features/settings/presentation/pages/edit_profile_screen.dart';
+import '../../features/settings/presentation/pages/change_password_screen.dart';
+import '../../features/settings/presentation/pages/change_password_success_screen.dart';
 
 /// GoRouter configuration for the entire app.
 class AppRouter {
@@ -61,6 +73,16 @@ class AppRouter {
         builder: (context, state) => const LoginScreen(),
       ),
       GoRoute(
+        path: '/forgot-password',
+        name: AppRoutes.forgotPassword,
+        builder: (context, state) => const ForgotPasswordScreen(),
+      ),
+      GoRoute(
+        path: '/forgot-password-success',
+        name: AppRoutes.forgotPasswordSuccess,
+        builder: (context, state) => const ForgotPasswordSuccessScreen(),
+      ),
+      GoRoute(
         path: '/dashboard',
         name: AppRoutes.dashboard,
         builder: (context, state) => const DashboardScreen(),
@@ -78,15 +100,30 @@ class AppRouter {
       GoRoute(
         path: '/contacts',
         name: AppRoutes.contacts,
-        builder: (context, state) => const ContactsScreen(),
+        builder: (context, state) => BlocProvider(
+          create: (_) => sl<ContactsBloc>()..add(LoadContactsEvent()),
+          child: const ContactsScreen(),
+        ),
       ),
       GoRoute(
-        path: '/add-contact',
+        path: '/contacts/add',
         name: AppRoutes.addContact,
-        builder: (context, state) => const AddContactScreen(),
+        builder: (context, state) => BlocProvider(
+          create: (_) => sl<ContactsBloc>(),
+          child: const AddContactScreen(),
+        ),
+      ),
+      GoRoute(
+        path: '/ad-manager',
+        name: AppRoutes.adManager,
+        builder: (context, state) => BlocProvider(
+          create: (_) => sl<AdsBloc>(),
+          child: const AdManagerScreen(),
+        ),
       ),
       GoRoute(
         path: '/location-sharing',
+
         name: AppRoutes.locationSharing,
         builder: (context, state) => const LocationSharingScreen(),
       ),
@@ -135,6 +172,21 @@ class AppRouter {
         name: AppRoutes.about,
         builder: (context, state) => const AboutScreen(),
       ),
+      GoRoute(
+        path: '/edit-profile',
+        name: AppRoutes.editProfile,
+        builder: (context, state) => const EditProfileScreen(),
+      ),
+      GoRoute(
+        path: '/change-password',
+        name: AppRoutes.changePassword,
+        builder: (context, state) => const ChangePasswordScreen(),
+      ),
+      GoRoute(
+        path: '/change-password-success',
+        name: AppRoutes.changePasswordSuccess,
+        builder: (context, state) => const ChangePasswordSuccessScreen(),
+      ),
     ],
     errorBuilder: (context, state) => Scaffold(
       body: Center(
@@ -143,3 +195,4 @@ class AppRouter {
     ),
   );
 }
+

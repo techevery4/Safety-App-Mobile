@@ -1,39 +1,41 @@
 import 'dart:async';
+import 'dart:math';
+import 'package:sensors_plus/sensors_plus.dart';
 
-/// Shake detection service using accelerometer data.
-/// Default: 3 shakes to trigger emergency.
 class ShakeDetectionService {
-  StreamController<void>? _shakeController;
-  bool _isListening = false;
+  StreamSubscription? _subscription;
+  final _shakeController = StreamController<void>.broadcast();
+  Stream<void> get onShakeDetected => _shakeController.stream;
 
-  /// Stream that emits when a shake sequence is detected.
-  Stream<void> get onShakeDetected {
-    _shakeController ??= StreamController<void>.broadcast();
-    return _shakeController!.stream;
-  }
+  static const double _shakeThreshold = 15.0; // configurable
+  static const int _minShakeCount = 3;
+  int _shakeCount = 0;
+  DateTime? _lastShakeTime;
 
-  bool get isListening => _isListening;
-
-  /// Start listening for shake events.
-  /// Uses sensors_plus accelerometer data.
   void startListening() {
-    // TODO: implement
-    // 1. Subscribe to accelerometerEventStream
-    // 2. Detect shake events based on threshold
-    // 3. Count shakes within reset window
-    // 4. Emit to _shakeController when count reaches target
-    _isListening = true;
+    _subscription = accelerometerEventStream().listen((event) {
+      final magnitude = sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
+      if (magnitude > _shakeThreshold) {
+        final now = DateTime.now();
+        if (_lastShakeTime == null || now.difference(_lastShakeTime!).inMilliseconds > 500) {
+          _shakeCount++;
+          _lastShakeTime = now;
+          if (_shakeCount >= _minShakeCount) {
+            _shakeController.add(null);
+            _shakeCount = 0;
+          }
+        }
+      }
+    });
   }
 
-  /// Stop listening for shake events.
   void stopListening() {
-    // TODO: implement
-    _isListening = false;
+    _subscription?.cancel();
+    _shakeCount = 0;
   }
 
-  /// Dispose resources.
   void dispose() {
-    _shakeController?.close();
-    _shakeController = null;
+    _subscription?.cancel();
+    _shakeController.close();
   }
 }

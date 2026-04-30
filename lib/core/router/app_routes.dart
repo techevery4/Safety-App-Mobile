@@ -15,6 +15,8 @@ class AppRoutes {
   static const String setupComplete = 'setup-complete';
   static const String uploadFailed = 'upload-failed';
   static const String login = 'login';
+  static const String forgotPassword = 'forgot-password';
+  static const String forgotPasswordSuccess = 'forgot-password-success';
 
   // Main
   static const String dashboard = 'dashboard';
@@ -40,4 +42,9 @@ class AppRoutes {
   static const String privacySettings = 'privacy-settings';
   static const String appPermissions = 'app-permissions';
   static const String about = 'about';
+  static const String adManager = 'ad-manager';
+  
+  static const String editProfile = 'edit-profile';
+  static const String changePassword = 'change-password';
+  static const String changePasswordSuccess = 'change-password-success';
 }

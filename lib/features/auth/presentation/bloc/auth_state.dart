@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/user_entity.dart';
+import '../../../../core/services/storage/onboarding_storage_service.dart';
 
 abstract class AuthState extends Equatable {
   const AuthState();
@@ -20,17 +21,30 @@ class AuthAuthenticated extends AuthState {
 class AuthUnauthenticated extends AuthState {}
 
 class AuthRegistrationSuccess extends AuthState {
-  final String email;
-  const AuthRegistrationSuccess(this.email);
+  final UserEntity user;
+  const AuthRegistrationSuccess(this.user);
   @override
-  List<Object?> get props => [email];
+  List<Object?> get props => [user];
 }
 
-class AuthOtpSent extends AuthState {
-  final String email;
-  const AuthOtpSent(this.email);
+class AuthProfileSetupSuccess extends AuthState {
+  final UserEntity user;
+  const AuthProfileSetupSuccess(this.user);
   @override
-  List<Object?> get props => [email];
+  List<Object?> get props => [user];
+}
+
+class AuthOnboardingStageResolved extends AuthState {
+  final OnboardingStage stage;
+  final String? userId;
+  final String? email;
+  const AuthOnboardingStageResolved({
+    required this.stage,
+    this.userId,
+    this.email,
+  });
+  @override
+  List<Object?> get props => [stage, userId, email];
 }
 
 class AuthError extends AuthState {

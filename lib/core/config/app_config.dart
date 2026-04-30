@@ -13,19 +13,19 @@ class AppConfig {
   });
 
   static AppConfig get dev => const AppConfig(
-        environment: Environment.dev,
-        baseUrl: 'http://localhost:8080/api/v1',
-      );
+    environment: Environment.dev,
+    baseUrl: 'https://roamsafe-latest-2.onrender.com',
+  );
 
   static AppConfig get staging => const AppConfig(
-        environment: Environment.staging,
-        baseUrl: '', // TODO: set staging URL
-      );
+    environment: Environment.staging,
+    baseUrl: '', // TODO: set staging URL
+  );
 
   static AppConfig get prod => const AppConfig(
-        environment: Environment.prod,
-        baseUrl: '', // TODO: set production URL
-      );
+    environment: Environment.prod,
+    baseUrl: '', // TODO: set production URL
+  );
 
   bool get isDev => environment == Environment.dev;
   bool get isStaging => environment == Environment.staging;

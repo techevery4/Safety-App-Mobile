@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'core/config/app_config.dart';
-import 'core/config/flavor_config.dart';
-import 'core/di/injection.dart';
-import 'app.dart';
+import 'package:roamsafe/core/config/app_config.dart';
+import 'package:roamsafe/core/config/flavor_config.dart';
+import 'package:roamsafe/core/di/injection.dart';
+import 'package:roamsafe/app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

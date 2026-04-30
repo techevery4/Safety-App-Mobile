@@ -5,18 +5,20 @@ class ApiEndpoints {
   static const String baseUrl = ''; // to be set in app_config.dart
 
   // Auth
-  static const String register = '/auth/register';
-  static const String login = '/auth/login';
-  static const String verifyOtp = '/auth/verify-otp';
-  static const String resendOtp = '/auth/resend-otp';
-  static const String logout = '/auth/logout';
-  static const String refreshToken = '/auth/refresh-token';
+  static const String register = '/api/v1/users';
+  static const String login = '/api/v1/users/login';
+  static const String setupProfile = '/api/v1/users/profile/setup';
+  static const String changePassword = '/api/v1/users/user/{id}/change-password';
+
+  // OTP (backend available but not in active flow)
+  static const String verifyOtp = '/api/v1/users/otp/verify';
+  static const String resendOtp = '/api/v1/users/otp/resend';
 
   // Profile
-  static const String getProfile = '/user/profile';
-  static const String updateProfile = '/user/profile';
-  static const String uploadProfilePhoto = '/user/profile/photo';
-  static const String deleteAccount = '/user/account';
+  static const String getProfile = '/api/v1/users/profile';
+  static const String updateProfile = '/api/v1/users/profile';
+  static const String uploadProfilePhoto = '/api/v1/users/profile/photo';
+  static const String deleteAccount = '/api/v1/users/account';
 
   // Emergency
   static const String triggerEmergency = '/emergency/trigger';
@@ -24,10 +26,11 @@ class ApiEndpoints {
   static const String getEmergencyHistory = '/emergency/history';
 
   // Contacts
-  static const String getTrustedContacts = '/contacts';
-  static const String addTrustedContact = '/contacts/add';
-  static const String removeTrustedContact = '/contacts/{id}';
-  static const String searchUserByEmail = '/contacts/search';
+  static const String contacts = '/api/v1/contacts';
+  static const String confirmedContacts = '/api/v1/contacts/user/{userId}/contacts/confirmed';
+  static const String pendingContacts = '/api/v1/contacts/user/{userId}/contact/requests';
+  static const String respondToContact = '/api/v1/contacts/contact/respond/{requestId}/{status}';
+  static const String removeContact = '/api/v1/contacts/{id}';
 
   // Location
   static const String shareLocation = '/location/share';

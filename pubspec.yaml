@@ -39,7 +39,7 @@ dependencies:
 
   # Notifications & Background
   flutter_local_notifications: ^17.1.2
-  workmanager: ^0.5.2
+  workmanager: ^0.6.0
 
   # Audio (Alarm)
   just_audio: ^0.9.38
@@ -72,6 +72,8 @@ dependencies:
   logger: ^2.3.0
   get_it: ^7.7.0
   injectable: ^2.4.1
+  flutter_image_compress: ^2.2.0
+  flutter_background_service: ^5.1.0
 
 dev_dependencies:
   flutter_test:

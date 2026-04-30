@@ -17,42 +17,42 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   final List<_OnboardingData> _pages = [
     _OnboardingData(
+      id: 1,
       title: 'Stay ',
       highlight: 'Connected',
       description: AppStrings.onboardingDesc1,
-      icon: Icons.people,
-      secondaryIcons: [Icons.people_outline, Icons.favorite, Icons.location_on],
+      imagePath: 'assets/images/connected.png',
     ),
     _OnboardingData(
+      id: 2,
       title: 'Instant ',
       highlight: 'Emergency',
       titleSuffix: ' Response',
       description: AppStrings.onboardingDesc2,
-      icon: Icons.sos,
-      secondaryIcons: [],
-      isSOSPage: true,
+      imagePath: 'assets/images/sos.png',
     ),
     _OnboardingData(
+      id: 3,
       title: 'Enjoy ',
       highlight: 'Peace',
       titleSuffix: ' of Mind',
       description: AppStrings.onboardingDesc3,
-      icon: Icons.shield,
-      secondaryIcons: [],
+      imagePath: 'assets/images/shield.png',
     ),
   ];
 
   void _nextPage() {
     if (_currentPage < _pages.length - 1) {
-      _pageController.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+      _pageController.nextPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
     } else {
       context.goNamed(AppRoutes.register);
     }
   }
 
-  void _skip() {
-    context.goNamed(AppRoutes.register);
-  }
+  void _skip() => context.goNamed(AppRoutes.register);
 
   @override
   void dispose() {
@@ -71,12 +71,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             Align(
               alignment: Alignment.topRight,
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
                 child: GestureDetector(
                   onTap: _skip,
                   child: const Text(
                     AppStrings.skip,
-                    style: TextStyle(fontSize: 16, color: AppColors.textPrimary, fontWeight: FontWeight.w500),
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
               ),
@@ -92,16 +99,31 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ),
             ),
 
-            // Button
+            // Next / Get Started button
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: CustomButton(
-                text: _currentPage == _pages.length - 1 ? AppStrings.getStarted : AppStrings.next,
+                text: _currentPage == _pages.length - 1
+                    ? AppStrings.getStarted
+                    : AppStrings.next,
                 onPressed: _nextPage,
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
+
+            // Outlined Login Button
+            if (_currentPage == _pages.length - 1)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: CustomButton(
+                  text: "Login",
+                  onPressed: () => context.goNamed(AppRoutes.login),
+                  isOutlined: true,
+                ),
+              ),
+
+            const SizedBox(height: 32),
 
             // Dot indicators
             Row(
@@ -114,7 +136,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   width: _currentPage == index ? 24 : 8,
                   height: 8,
                   decoration: BoxDecoration(
-                    color: _currentPage == index ? AppColors.primary : AppColors.dotInactive,
+                    color: _currentPage == index
+                        ? AppColors.primary
+                        : AppColors.dotInactive,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -134,36 +158,39 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Circular illustration
+          // Outer teal ring
           Container(
-            width: 240,
-            height: 240,
-            decoration: BoxDecoration(
+            width: 260,
+            height: 260,
+            decoration: const BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.onboardingCircleOuter.withValues(alpha: 0.6),
+              color: AppColors.onboardingCircleOuter,
             ),
             child: Center(
+              // Inner white circle that holds the image
               child: Container(
-                width: 160,
-                height: 160,
+                width: 180,
+                height: 180,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppColors.onboardingCircleInner.withValues(alpha: 0.8),
-                  border: Border.all(color: AppColors.onboardingCircleOuter.withValues(alpha: 0.3), width: 3),
+                  color: data.id == 1 ? Colors.white : Colors.transparent,
                 ),
-                child: data.isSOSPage
-                    ? _buildSOSIcon()
-                    : _buildFeatureIcon(data),
+                child: Image.asset(data.imagePath, fit: BoxFit.cover),
               ),
             ),
           ),
-          const SizedBox(height: 40),
+
+          const SizedBox(height: 48),
 
           // Title with highlighted word
           RichText(
             textAlign: TextAlign.center,
             text: TextSpan(
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+              style: const TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
               children: [
                 TextSpan(text: data.title),
                 TextSpan(
@@ -174,114 +201,39 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ],
             ),
           ),
+
           const SizedBox(height: 16),
 
           // Description
           Text(
             data.description,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 16, color: AppColors.textSecondary, height: 1.5),
+            style: const TextStyle(
+              fontSize: 16,
+              color: AppColors.textSecondary,
+              height: 1.5,
+            ),
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildSOSIcon() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Container(
-          width: 70,
-          height: 120,
-          decoration: BoxDecoration(
-            color: AppColors.textPrimary.withValues(alpha: 0.8),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [
-                      AppColors.primary,
-                      AppColors.primary.withValues(alpha: 0.3),
-                    ],
-                  ),
-                ),
-                child: const Center(
-                  child: Text('SOS', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildFeatureIcon(_OnboardingData data) {
-    if (data.secondaryIcons.isNotEmpty) {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _circleIcon(Icons.person, 28),
-              const SizedBox(width: 16),
-              _circleIcon(Icons.people_outline, 28),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _circleIcon(Icons.favorite, 28),
-              const SizedBox(width: 16),
-              _circleIcon(Icons.location_on, 28),
-            ],
-          ),
-        ],
-      );
-    }
-    return Icon(data.icon, size: 60, color: AppColors.primary);
-  }
-
-  Widget _circleIcon(IconData icon, double size) {
-    return Container(
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: Colors.white,
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.5)),
-      ),
-      child: Icon(icon, size: size - 8, color: AppColors.primary),
     );
   }
 }
 
 class _OnboardingData {
+  final int id;
   final String title;
   final String highlight;
   final String? titleSuffix;
   final String description;
-  final IconData icon;
-  final List<IconData> secondaryIcons;
-  final bool isSOSPage;
+  final String imagePath;
 
   const _OnboardingData({
+    required this.id,
     required this.title,
     required this.highlight,
     this.titleSuffix,
     required this.description,
-    required this.icon,
-    required this.secondaryIcons,
-    this.isSOSPage = false,
+    required this.imagePath,
   });
 }

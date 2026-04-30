@@ -1,6 +1,21 @@
+import '../entities/contact_entity.dart';
 import '../repositories/contacts_repository.dart';
-class AddContactUseCase {
-  final ContactsRepository repository;
-  AddContactUseCase(this.repository);
-  Future<void> call({required String email}) => repository.addContact(email: email);
+
+/// Use case to add a new contact by name and email.
+class AddContactUsecase {
+  final ContactsRepository _repository;
+
+  AddContactUsecase(this._repository);
+
+  Future<ContactEntity> call({
+    required String userId,
+    required String name,
+    required String email,
+  }) async {
+    return _repository.addContact(
+      userId: userId,
+      name: name,
+      email: email,
+    );
+  }
 }

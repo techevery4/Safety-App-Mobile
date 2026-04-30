@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../../advertising/domain/entities/ad_entity.dart';
 
 abstract class AdsState extends Equatable {
   const AdsState();
@@ -8,7 +9,13 @@ abstract class AdsState extends Equatable {
 
 class AdsInitial extends AdsState {}
 class AdsLoading extends AdsState {}
-class AdsLoaded extends AdsState {}
+class AdsLoaded extends AdsState {
+  final List<AdEntity> ads;
+  const AdsLoaded(this.ads);
+  @override
+  List<Object?> get props => [ads];
+}
+class AdCreatedSuccess extends AdsState {}
 class AdsError extends AdsState {
   final String message;
   const AdsError(this.message);

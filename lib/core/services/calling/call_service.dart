@@ -1,13 +1,10 @@
-/// Call service — handles emergency phone calls via url_launcher.
+import 'package:url_launcher/url_launcher.dart';
+
 class CallService {
-  /// Initiate an emergency call to the given phone number.
-  /// Emergency call must route within 3 seconds.
-  /// Call rerouting OFF = no call is made during emergency.
-  Future<void> callEmergencyNumber(String number) async {
-    // TODO: implement using url_launcher
-    // final uri = Uri(scheme: 'tel', path: number);
-    // if (await canLaunchUrl(uri)) {
-    //   await launchUrl(uri);
-    // }
+  Future<void> call(String number) async {
+    final Uri uri = Uri.parse('tel:$number');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
   }
 }

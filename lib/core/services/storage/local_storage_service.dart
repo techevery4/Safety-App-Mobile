@@ -1,34 +1,38 @@
+import 'package:shared_preferences/shared_preferences.dart';
+
 /// Local storage service for non-sensitive preferences.
 class LocalStorageService {
+  final SharedPreferences _prefs;
+
+  LocalStorageService(this._prefs);
+
   /// Save a string value.
   Future<void> saveString(String key, String value) async {
-    // TODO: implement using shared_preferences or hive
+    await _prefs.setString(key, value);
   }
 
   /// Get a string value.
   Future<String?> getString(String key) async {
-    // TODO: implement
-    return null;
+    return _prefs.getString(key);
   }
 
   /// Save a bool value.
   Future<void> saveBool(String key, bool value) async {
-    // TODO: implement
+    await _prefs.setBool(key, value);
   }
 
   /// Get a bool value.
   Future<bool?> getBool(String key) async {
-    // TODO: implement
-    return null;
+    return _prefs.getBool(key);
   }
 
   /// Remove a value.
   Future<void> remove(String key) async {
-    // TODO: implement
+    await _prefs.remove(key);
   }
 
   /// Clear all stored data.
   Future<void> clear() async {
-    // TODO: implement
+    await _prefs.clear();
   }
 }

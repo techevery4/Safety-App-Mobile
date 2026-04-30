@@ -5,6 +5,8 @@ class AppAssets {
   // Images
   static const String logo = 'assets/images/logo.png';
   static const String placeholder = 'assets/images/placeholder.png';
+  static const String successImage = 'assets/images/success.png';
+  static const String errorImage = 'assets/images/error.png';
 
   // Icons
   static const String iconsDir = 'assets/icons/';
