@@ -1,27 +1,39 @@
 class SettingsEntity {
-  final bool locationSharingEnabled;
-  final bool shakeTriggerEnabled;
-  final bool alarmSoundEnabled;
-  final bool autoReroutingEnabled;
+  final String? id;
+  final String? userId;
+  final bool emergencySharing;
+  final bool shakeTrigger;
+  final bool alarmSound;
+  final bool autoRerouting;
+  final DateTime? createdOn;
 
   const SettingsEntity({
-    this.locationSharingEnabled = true,
-    this.shakeTriggerEnabled = true,
-    this.alarmSoundEnabled = true,
-    this.autoReroutingEnabled = true,
+    this.id,
+    this.userId,
+    this.emergencySharing = true,
+    this.shakeTrigger = true,
+    this.alarmSound = true,
+    this.autoRerouting = true,
+    this.createdOn,
   });
 
   SettingsEntity copyWith({
-    bool? locationSharingEnabled,
-    bool? shakeTriggerEnabled,
-    bool? alarmSoundEnabled,
-    bool? autoReroutingEnabled,
+    String? id,
+    String? userId,
+    bool? emergencySharing,
+    bool? shakeTrigger,
+    bool? alarmSound,
+    bool? autoRerouting,
+    DateTime? createdOn,
   }) {
     return SettingsEntity(
-      locationSharingEnabled: locationSharingEnabled ?? this.locationSharingEnabled,
-      shakeTriggerEnabled: shakeTriggerEnabled ?? this.shakeTriggerEnabled,
-      alarmSoundEnabled: alarmSoundEnabled ?? this.alarmSoundEnabled,
-      autoReroutingEnabled: autoReroutingEnabled ?? this.autoReroutingEnabled,
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      emergencySharing: emergencySharing ?? this.emergencySharing,
+      shakeTrigger: shakeTrigger ?? this.shakeTrigger,
+      alarmSound: alarmSound ?? this.alarmSound,
+      autoRerouting: autoRerouting ?? this.autoRerouting,
+      createdOn: createdOn ?? this.createdOn,
     );
   }
 }

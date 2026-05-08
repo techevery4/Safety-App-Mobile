@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/constants/app_assets.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/services/storage/onboarding_storage_service.dart';
 import '../bloc/auth_bloc.dart';
@@ -62,17 +63,20 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               context.goNamed(AppRoutes.onboarding);
               break;
             case OnboardingStage.registered:
-              // User created account but hasn't set up profile
               context.goNamed(AppRoutes.setupProfile);
               break;
             case OnboardingStage.profileSetup:
-              // User set up name but hasn't uploaded photo / finished
               context.goNamed(AppRoutes.setupProfile);
               break;
             case OnboardingStage.completed:
-              context.goNamed(AppRoutes.dashboard);
+              // Load the cached user into AuthBloc before navigating
+              context.read<AuthBloc>().add(AuthCheckStatus());
               break;
           }
+        } else if (state is AuthAuthenticated) {
+          context.goNamed(AppRoutes.dashboard);
+        } else if (state is AuthUnauthenticated) {
+          context.goNamed(AppRoutes.login);
         }
       },
       child: Scaffold(
@@ -85,24 +89,17 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                    child: const Icon(Icons.shield, size: 60, color: Colors.white),
+                  Image.asset(
+                    AppAssets.logo,
+                    width: 120,
+                    height: 120,
+                    fit: BoxFit.contain,
                   ),
                   const SizedBox(height: 24),
-                  const Text(
-                    AppStrings.appName,
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primary,
-                      letterSpacing: 2,
-                    ),
+                  Image.asset(
+                    AppAssets.roamsafeText,
+                    height: 40,
+                    fit: BoxFit.contain,
                   ),
                 ],
               ),

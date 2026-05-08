@@ -14,7 +14,7 @@ class AppConfig {
 
   static AppConfig get dev => const AppConfig(
     environment: Environment.dev,
-    baseUrl: 'https://roamsafe-latest-2.onrender.com',
+    baseUrl: 'https://roam.techeverywhere.info/api/v1',
   );
 
   static AppConfig get staging => const AppConfig(

@@ -12,6 +12,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injection.dart';
 import '../../../ads/presentation/bloc/ads_bloc.dart';
 import '../../../ads/presentation/bloc/ads_event.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../auth/presentation/bloc/auth_state.dart';
+import '../../../auth/domain/entities/user_entity.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -19,28 +22,25 @@ class DashboardScreen extends StatefulWidget {
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-
 class _DashboardScreenState extends State<DashboardScreen> {
   int _currentNavIndex = 0;
 
   void _onNavTap(int index) {
-    setState(() => _currentNavIndex = index);
+    if (index == 0) return;
     switch (index) {
       case 1:
-        context.pushNamed(AppRoutes.contacts);
+        context.goNamed(AppRoutes.contacts);
         break;
       case 2:
-        context.pushNamed(AppRoutes.locationSharing);
+        context.goNamed(AppRoutes.locationSharing);
         break;
       case 3:
-        context.pushNamed(AppRoutes.settings);
+        context.goNamed(AppRoutes.settings);
         break;
     }
   }
 
   void _onSOSTapped() {
-    // TODO: trigger emergency via EmergencyBloc
-    // Alert must activate within 2 seconds of trigger
     context.pushNamed(AppRoutes.emergencyActive);
   }
 
@@ -50,57 +50,105 @@ class _DashboardScreenState extends State<DashboardScreen> {
       create: (context) => sl<AdsBloc>()..add(AdsLoadRequested()),
       child: Scaffold(
         backgroundColor: AppColors.background,
-        body: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Top bar with avatar, greeting, and notification bell
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 22,
-                      backgroundColor: AppColors.primaryLight,
-                      child: const Icon(Icons.person, color: AppColors.primary),
+        body: BlocBuilder<AuthBloc, AuthState>(
+          builder: (context, authState) {
+            String firstName = 'User';
+            bool isSafe = true;
+            String? profilePictureUrl;
+
+            UserEntity? user;
+
+            if (authState is AuthAuthenticated) {
+              user = authState.user;
+            } else if (authState is AuthRegistrationSuccess) {
+              user = authState.user;
+            } else if (authState is AuthProfileSetupSuccess) {
+              user = authState.user;
+            }
+
+            if (user != null) {
+              firstName = user.firstName ?? 'User';
+              isSafe = user.status?.toUpperCase() != 'EMERGENCY';
+              profilePictureUrl = user.profilePictureUrl;
+            }
+
+            return SafeArea(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Top bar with avatar, greeting, and notification bell
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
                     ),
-                    const SizedBox(width: 12),
-                    const Expanded(
-                      child: Text(
-                        '${AppStrings.welcome} Adenike',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 22,
+                          backgroundColor: AppColors.primaryLight,
+                          backgroundImage: profilePictureUrl != null
+                              ? NetworkImage(profilePictureUrl)
+                              : null,
+                          child: profilePictureUrl == null
+                              ? const Icon(
+                                  Icons.person,
+                                  color: AppColors.primary,
+                                )
+                              : null,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            '${AppStrings.welcome} $firstName',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {},
+                          icon: const Icon(
+                            Icons.notifications_outlined,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Safety status indicator
+                  Center(child: SafetyStatusIndicator(isSafe: isSafe)),
+                  const SizedBox(height: 20),
+
+                  // Ad carousel
+                  const Padding(
+                    padding: EdgeInsets.only(left: 20),
+                    child: Text(
+                      AppStrings.advertisement,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.textPrimary,
                       ),
                     ),
-                    IconButton(
-                      onPressed: () {},
-                      icon: const Icon(Icons.notifications_outlined, color: AppColors.textPrimary),
+                  ),
+                  const SizedBox(height: 8),
+                  const AdCarouselWidget(),
+                  const SizedBox(height: 16),
+
+                  // SOS Button
+                  Expanded(
+                    child: Center(
+                      child: EmergencyButton(onPressed: _onSOSTapped),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-
-              // Safety status indicator
-              const Center(child: SafetyStatusIndicator(isSafe: true)),
-              const SizedBox(height: 20),
-
-              // Ad carousel
-              const Padding(
-                padding: EdgeInsets.only(left: 20),
-                child: Text(AppStrings.advertisement,
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.textPrimary)),
-              ),
-              const SizedBox(height: 8),
-              const AdCarouselWidget(),
-              const SizedBox(height: 16),
-
-              // SOS Button
-              Expanded(
-                child: Center(
-                  child: EmergencyButton(onPressed: _onSOSTapped),
-                ),
-              ),
-            ],
-          ),
+            );
+          },
         ),
         bottomNavigationBar: BottomNavBar(
           currentIndex: _currentNavIndex,
@@ -110,4 +158,3 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 }
-

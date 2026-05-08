@@ -16,3 +16,7 @@ class ChangePasswordFailure extends SettingsState {
   final String message;
   ChangePasswordFailure(this.message);
 }
+class SettingsUpdateFailed extends SettingsState {
+  final String message;
+  SettingsUpdateFailed(this.message);
+}

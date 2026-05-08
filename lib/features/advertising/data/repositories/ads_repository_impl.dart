@@ -6,7 +6,7 @@ class AdsRepositoryImpl implements AdsRepository {
     // Dummy ads
     const AdEntity(
       id: '1',
-      imageUrl: 'https://via.placeholder.com/1080x1920?text=Safety+First',
+      imageUrl: '://via.placeholder.com/1080x1920?text=Safety+First',
       title: 'Safety First',
       status: 'active',
     ),

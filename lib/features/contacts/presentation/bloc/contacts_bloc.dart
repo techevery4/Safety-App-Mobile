@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:dio/dio.dart';
 import '../../domain/entities/contact_entity.dart';
 import '../../domain/usecases/get_confirmed_contacts_usecase.dart';
 import '../../domain/usecases/get_pending_contacts_usecase.dart';
@@ -131,8 +132,15 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
       );
       emit(AddContactSuccess());
       add(LoadContactsEvent()); // Refresh lists
-    } catch (_) {
-      emit(AddContactFailure());
+    } on DioException catch (e) {
+      if (e.response != null) {
+        // Backend responded with an error (e.g. 404 User Not Found)
+        emit(AddContactFailure());
+      } else {
+        emit(ContactsError(message: e.message ?? 'Network error'));
+      }
+    } catch (e) {
+      emit(ContactsError(message: e.toString()));
     }
   }
 

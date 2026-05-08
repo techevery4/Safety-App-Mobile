@@ -55,6 +55,13 @@ class _AddContactScreenState extends State<AddContactScreen> {
             _isLoading = false;
             _currentView = _AddContactView.failure;
           });
+        } else if (state is ContactsError) {
+          setState(() {
+            _isLoading = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.message)),
+          );
         }
       },
       child: _buildCurrentView(),
@@ -87,7 +94,7 @@ class _AddContactScreenState extends State<AddContactScreen> {
           onPressed: () => context.pop(),
         ),
         title: const Text(
-          AppStrings.addContact,
+          AppStrings.addNewContact,
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: AppColors.textPrimary,
@@ -96,29 +103,42 @@ class _AddContactScreenState extends State<AddContactScreen> {
         ),
       ),
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Form(
             key: _formKey,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const SizedBox(height: 24),
-                CustomTextField(
-                  label: AppStrings.contactName,
-                  hintText: AppStrings.enterContactName,
-                  controller: _nameController,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Please enter a name';
-                    }
-                    return null;
-                  },
+                CircleAvatar(
+                  radius: 48,
+                  backgroundColor: const Color(0xFFB2EBF2),
+                  child: const Icon(Icons.person_add,
+                      color: Color(0xFF000080), size: 40),
                 ),
                 const SizedBox(height: 16),
+                const Text(
+                  AppStrings.addNewContact,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Enter the email address of the person\nyou will like to add. They will be notified\nimmediately.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 32),
                 CustomTextField(
-                  label: AppStrings.contactEmail,
-                  hintText: AppStrings.enterContactEmail,
+                  label: 'Email Address',
+                  hintText: 'Enter email address',
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
@@ -131,6 +151,39 @@ class _AddContactScreenState extends State<AddContactScreen> {
                     if (!emailRegex.hasMatch(value.trim())) {
                       return 'Please enter a valid email address';
                     }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFDE8E8),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.info, color: Color(0xFFE65100), size: 16),
+                      const SizedBox(width: 8),
+                      const Expanded(
+                        child: Text(
+                          'Note: Contacts added must be an existing app user',
+                          style: TextStyle(
+                            color: Color(0xFFE65100),
+                            fontSize: 12,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                CustomTextField(
+                  label: 'Name (Optional)',
+                  hintText: 'Enter name',
+                  controller: _nameController,
+                  validator: (value) {
                     return null;
                   },
                 ),
@@ -150,6 +203,29 @@ class _AddContactScreenState extends State<AddContactScreen> {
                     }
                   },
                 ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: OutlinedButton(
+                    onPressed: () => context.pop(),
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      side: const BorderSide(color: AppColors.border),
+                    ),
+                    child: const Text(
+                      AppStrings.cancel,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.error,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
               ],
             ),
           ),

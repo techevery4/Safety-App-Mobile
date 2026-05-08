@@ -45,3 +45,31 @@ class AuthLogoutRequested extends AuthEvent {}
 class AuthCheckStatus extends AuthEvent {}
 
 class AuthCheckOnboardingStage extends AuthEvent {}
+
+class AuthUpdateUserRequested extends AuthEvent {
+  final String? firstName;
+  final String? lastName;
+  final String? status;
+  final double? latitude;
+  final double? longitude;
+  final String? locationText;
+
+  const AuthUpdateUserRequested({
+    this.firstName,
+    this.lastName,
+    this.status,
+    this.latitude,
+    this.longitude,
+    this.locationText,
+  });
+
+  @override
+  List<Object?> get props => [
+        firstName,
+        lastName,
+        status,
+        latitude,
+        longitude,
+        locationText,
+      ];
+}

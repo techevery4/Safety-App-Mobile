@@ -3,6 +3,7 @@ import '../../domain/entities/user_entity.dart';
 import '../datasources/auth_remote_datasource.dart';
 import '../datasources/auth_local_datasource.dart';
 import '../../../../core/services/storage/onboarding_storage_service.dart';
+import '../models/user_model.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource _remoteDataSource;
@@ -13,9 +14,9 @@ class AuthRepositoryImpl implements AuthRepository {
     required AuthRemoteDataSource remoteDataSource,
     required AuthLocalDataSource localDataSource,
     required OnboardingStorageService onboardingStorage,
-  })  : _remoteDataSource = remoteDataSource,
-        _localDataSource = localDataSource,
-        _onboardingStorage = onboardingStorage;
+  }) : _remoteDataSource = remoteDataSource,
+       _localDataSource = localDataSource,
+       _onboardingStorage = onboardingStorage;
 
   @override
   Future<UserEntity> register({
@@ -78,7 +79,10 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<UserEntity> verifyOtp({required String email, required String otp}) async {
+  Future<UserEntity> verifyOtp({
+    required String email,
+    required String otp,
+  }) async {
     // This flow is currently skipped in the UI but the repository provides the method
     throw UnimplementedError('OTP verification is currently skipped');
   }
@@ -92,7 +96,12 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<void> logout() async {
     await _localDataSource.clearCache();
-    await _onboardingStorage.clearAll();
+    // await _onboardingStorage.clearAll();
+    // We keep the onboarding stage as 'completed' if it was already completed,
+    // so the user sees the Login screen on next launch instead of Onboarding.
+    // But we clear the user-specific IDs.
+    await _onboardingStorage.saveUserId('');
+    await _onboardingStorage.saveEmail('');
   }
 
   @override
@@ -120,5 +129,41 @@ class AuthRepositoryImpl implements AuthRepository {
     );
     await _localDataSource.cacheUser(user);
     return user;
+  }
+
+  @override
+  Future<UserEntity> updateUser(UserEntity user) async {
+    UserModel userModel;
+    if (user is UserModel) {
+      userModel = user;
+    } else {
+      // Convert UserEntity to UserModel if necessary
+      // This part might need adjustment based on how UserModel is structured
+      // For now, assuming we can cast or reconstruct it.
+      // Since all user objects in the app should ideally be UserModels, this should be safe.
+      userModel = UserModel(
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        profilePictureId: user.profilePictureId,
+        profilePictureUrl: user.profilePictureUrl,
+        status: user.status,
+        latitude: user.latitude,
+        longitude: user.longitude,
+        locationText: user.locationText,
+        lastIp: user.lastIp,
+        lastLocationUpdate: user.lastLocationUpdate,
+        lastLogin: user.lastLogin,
+        settings: user.settings,
+        totalAlerts: user.totalAlerts,
+        alerts: user.alerts,
+        createdOn: user.createdOn,
+      );
+    }
+
+    final updatedUser = await _remoteDataSource.updateUser(userModel);
+    await _localDataSource.cacheUser(updatedUser);
+    return updatedUser;
   }
 }

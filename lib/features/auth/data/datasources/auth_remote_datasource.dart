@@ -21,6 +21,7 @@ abstract class AuthRemoteDataSource {
     required String newPassword,
     required String confirmPassword,
   });
+  Future<UserModel> updateUser(UserModel user);
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -92,6 +93,15 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'newPassword': newPassword,
         'confirmPassword': confirmPassword,
       },
+    );
+    return UserModel.fromJson(response.data);
+  }
+
+  @override
+  Future<UserModel> updateUser(UserModel user) async {
+    final response = await _dio.put(
+      ApiEndpoints.updateUser,
+      data: user.toJson(),
     );
     return UserModel.fromJson(response.data);
   }

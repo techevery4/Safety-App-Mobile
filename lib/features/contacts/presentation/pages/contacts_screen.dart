@@ -58,10 +58,10 @@ class _ContactsScreenState extends State<ContactsScreen> {
         // Already on contacts
         break;
       case 2:
-        context.pushNamed(AppRoutes.locationSharing);
+        context.goNamed(AppRoutes.locationSharing);
         break;
       case 3:
-        context.pushNamed(AppRoutes.settings);
+        context.goNamed(AppRoutes.settings);
         break;
     }
   }
@@ -74,10 +74,10 @@ class _ContactsScreenState extends State<ContactsScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
-          onPressed: () => context.pop(),
-        ),
+        // leading: IconButton(
+        //   icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+        //   onPressed: () => context.pop(),
+        // ),
         title: const Text(
           AppStrings.contacts,
           style: TextStyle(
@@ -155,7 +155,9 @@ class _ContactsScreenState extends State<ContactsScreen> {
                   confirmed: confirmed,
                   pending: pending,
                   filtered: filtered,
-                  isLoadingMore: state is ContactsLoaded ? state.isLoadingMore : false,
+                  isLoadingMore: state is ContactsLoaded
+                      ? state.isLoadingMore
+                      : false,
                 ),
               ),
 
@@ -188,10 +190,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
           );
         },
       ),
-      bottomNavigationBar: BottomNavBar(
-        currentIndex: 1,
-        onTap: _onNavTap,
-      ),
+      bottomNavigationBar: BottomNavBar(currentIndex: 1, onTap: _onNavTap),
     );
   }
 
@@ -211,8 +210,8 @@ class _ContactsScreenState extends State<ContactsScreen> {
                 _selectedTab = 0;
                 _searchController.clear();
                 context.read<ContactsBloc>().add(
-                      const SearchContactsEvent(query: ''),
-                    );
+                  const SearchContactsEvent(query: ''),
+                );
               }),
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 10),
@@ -242,8 +241,8 @@ class _ContactsScreenState extends State<ContactsScreen> {
                 _selectedTab = 1;
                 _searchController.clear();
                 context.read<ContactsBloc>().add(
-                      const SearchContactsEvent(query: ''),
-                    );
+                  const SearchContactsEvent(query: ''),
+                );
               }),
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 10),
@@ -281,9 +280,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
       child: TextField(
         controller: _searchController,
         onChanged: (query) {
-          context.read<ContactsBloc>().add(
-                SearchContactsEvent(query: query),
-              );
+          context.read<ContactsBloc>().add(SearchContactsEvent(query: query));
         },
         decoration: const InputDecoration(
           hintText: AppStrings.searchForContact,
@@ -311,10 +308,11 @@ class _ContactsScreenState extends State<ContactsScreen> {
 
     if (isSearching) {
       displayList = filtered
-          .where((c) =>
-              _selectedTab == 0
-                  ? c.status == ContactStatus.confirmed
-                  : c.status == ContactStatus.pending)
+          .where(
+            (c) => _selectedTab == 0
+                ? c.status == ContactStatus.confirmed
+                : c.status == ContactStatus.pending,
+          )
           .toList();
     } else {
       displayList = _selectedTab == 0 ? confirmed : pending;
@@ -326,10 +324,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
           _selectedTab == 0
               ? AppStrings.noContactsYet
               : AppStrings.noPendingRequests,
-          style: const TextStyle(
-            fontSize: 16,
-            color: AppColors.textSecondary,
-          ),
+          style: const TextStyle(fontSize: 16, color: AppColors.textSecondary),
         ),
       );
     }
@@ -394,15 +389,16 @@ class _ContactsScreenState extends State<ContactsScreen> {
             )
           else ...[
             IconButton(
-              icon: const Icon(Icons.check_circle_outline,
-                  color: AppColors.success),
+              icon: const Icon(
+                Icons.check_circle_outline,
+                color: AppColors.success,
+              ),
               onPressed: () {
                 context.read<ContactsBloc>().add(
-                      AcceptContactEvent(contactId: contact.id),
-                    );
+                  AcceptContactEvent(contactId: contact.id),
+                );
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text(AppStrings.contactAccepted)),
+                  const SnackBar(content: Text(AppStrings.contactAccepted)),
                 );
               },
             ),
@@ -418,91 +414,96 @@ class _ContactsScreenState extends State<ContactsScreen> {
 
   void _showRemoveSheet(BuildContext context, ContactEntity contact) {
     final bloc = context.read<ContactsBloc>();
-    showModalBottomSheet(
+    showDialog(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
       builder: (_) {
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircleAvatar(
-                radius: 32,
-                backgroundColor: AppColors.errorBackground,
-                child: const Icon(Icons.person_remove,
-                    color: AppColors.error, size: 28),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                '${AppStrings.removeContact.replaceAll('Contact', '')}${contact.name}?',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                AppStrings.removeContactDesc,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: AppColors.textSecondary,
-                  height: 1.5,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton(
-                  onPressed: () {
-                    bloc.add(RemoveContactEvent(contactId: contact.id));
-                    Navigator.pop(context);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.error,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                  ),
-                  child: const Text(
-                    AppStrings.removeContact,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textWhite,
-                    ),
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircleAvatar(
+                  radius: 32,
+                  backgroundColor: AppColors.errorBackground,
+                  child: const Icon(
+                    Icons.person_remove,
+                    color: AppColors.error,
+                    size: 28,
                   ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: OutlinedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: OutlinedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    side: const BorderSide(color: AppColors.border),
+                const SizedBox(height: 16),
+                Text(
+                  '${AppStrings.removeContact.replaceAll('Contact', '')}${contact.name}?',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
                   ),
-                  child: const Text(
-                    AppStrings.cancel,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  AppStrings.removeContactDesc,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textSecondary,
+                    height: 1.5,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      bloc.add(RemoveContactEvent(contactId: contact.id));
+                      Navigator.pop(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.error,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                    ),
+                    child: const Text(
+                      AppStrings.removeContact,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textWhite,
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      side: const BorderSide(color: AppColors.border),
+                    ),
+                    child: const Text(
+                      AppStrings.cancel,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -511,95 +512,101 @@ class _ContactsScreenState extends State<ContactsScreen> {
 
   void _showDeclineSheet(BuildContext context, ContactEntity contact) {
     final bloc = context.read<ContactsBloc>();
-    showModalBottomSheet(
+    showDialog(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
       builder: (_) {
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircleAvatar(
-                radius: 32,
-                backgroundColor: AppColors.warningBackground,
-                child: const Icon(Icons.warning_amber_rounded,
-                    color: AppColors.warning, size: 28),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                AppStrings.declineThisRequest,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                AppStrings.declineRequestDesc,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: AppColors.textSecondary,
-                  height: 1.5,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton(
-                  onPressed: () {
-                    bloc.add(DeclineContactEvent(contactId: contact.id));
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text(AppStrings.requestDeclined)),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.error,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                  ),
-                  child: const Text(
-                    AppStrings.declineRequest,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textWhite,
-                    ),
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircleAvatar(
+                  radius: 32,
+                  backgroundColor: AppColors.warningBackground,
+                  child: const Icon(
+                    Icons.warning_amber_rounded,
+                    color: AppColors.warning,
+                    size: 28,
                   ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: OutlinedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: OutlinedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    side: const BorderSide(color: AppColors.border),
+                const SizedBox(height: 16),
+                const Text(
+                  AppStrings.declineThisRequest,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
                   ),
-                  child: const Text(
-                    AppStrings.cancel,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  AppStrings.declineRequestDesc,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textSecondary,
+                    height: 1.5,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      bloc.add(DeclineContactEvent(contactId: contact.id));
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(AppStrings.requestDeclined),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.error,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                    ),
+                    child: const Text(
+                      AppStrings.declineRequest,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textWhite,
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      side: const BorderSide(color: AppColors.border),
+                    ),
+                    child: const Text(
+                      AppStrings.cancel,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },

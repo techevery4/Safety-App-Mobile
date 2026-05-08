@@ -3,6 +3,7 @@ import 'package:roamsafe/core/config/flavor_config.dart';
 import 'package:roamsafe/core/network/api_client.dart';
 import 'package:roamsafe/core/services/calling/call_service.dart';
 import 'package:roamsafe/core/services/alarm/alarm_service.dart';
+import 'package:roamsafe/core/services/shake/shake_detection_service.dart';
 import 'package:roamsafe/core/services/location/location_service.dart';
 import 'package:roamsafe/core/services/storage/secure_storage_service.dart';
 import 'package:roamsafe/core/services/storage/local_storage_service.dart';
@@ -16,6 +17,7 @@ import 'package:roamsafe/features/auth/domain/usecases/login_user_usecase.dart';
 import 'package:roamsafe/features/auth/domain/usecases/setup_profile_usecase.dart';
 import 'package:roamsafe/features/auth/domain/usecases/get_current_user_usecase.dart';
 import 'package:roamsafe/features/auth/domain/usecases/logout_usecase.dart';
+import 'package:roamsafe/features/auth/domain/usecases/update_user_usecase.dart';
 import 'package:roamsafe/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:roamsafe/features/settings/domain/repositories/settings_repository.dart';
 import 'package:roamsafe/features/settings/data/repositories/settings_repository_impl.dart';
@@ -36,6 +38,8 @@ import 'package:roamsafe/features/advertising/domain/repositories/ads_repository
 import 'package:roamsafe/features/advertising/data/repositories/ads_repository_impl.dart';
 import 'package:roamsafe/features/advertising/domain/usecases/get_active_ads_usecase.dart';
 import 'package:roamsafe/features/advertising/domain/usecases/create_ad_usecase.dart';
+import 'package:roamsafe/features/profile/domain/repositories/profile_repository.dart';
+import 'package:roamsafe/features/profile/data/repositories/profile_repository_impl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Global GetIt service locator instance.
@@ -66,6 +70,7 @@ Future<void> configureDependencies() async {
   // Services
   sl.registerLazySingleton<CallService>(() => CallService());
   sl.registerLazySingleton<AlarmService>(() => AlarmService());
+  sl.registerLazySingleton<ShakeDetectionService>(() => ShakeDetectionService());
   sl.registerLazySingleton<LocationService>(() => LocationService());
 
   // Auth — Data Sources
@@ -101,15 +106,20 @@ Future<void> configureDependencies() async {
   sl.registerLazySingleton<LogoutUseCase>(
     () => LogoutUseCase(sl()),
   );
+  sl.registerLazySingleton<UpdateUserUseCase>(
+    () => UpdateUserUseCase(sl()),
+  );
 
-  // Contacts — Data Sources
   sl.registerLazySingleton<ContactsRemoteDatasource>(
     () => ContactsRemoteDatasource(sl<ApiClient>().dio),
   );
 
   // Repositories
   sl.registerLazySingleton<SettingsRepository>(
-    () => SettingsRepositoryImpl(sl()),
+    () => SettingsRepositoryImpl(sl<AuthRepository>()),
+  );
+  sl.registerLazySingleton<ProfileRepository>(
+    () => ProfileRepositoryImpl(sl<AuthRepository>()),
   );
   sl.registerLazySingleton<ContactsRepository>(
     () => ContactsRepositoryImpl(sl()),
@@ -153,11 +163,13 @@ Future<void> configureDependencies() async {
     setupProfileUseCase: sl(),
     getCurrentUserUseCase: sl(),
     logoutUseCase: sl(),
+    updateUserUseCase: sl(),
     onboardingStorage: sl(),
   ));
 
   sl.registerFactory(() => EmergencyBloc(
     alarmService: sl(),
+    shakeDetectionService: sl(),
     callService: sl(),
     locationService: sl(),
     settingsRepository: sl(),

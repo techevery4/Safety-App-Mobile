@@ -13,25 +13,24 @@ class AuthLoading extends AuthState {}
 
 class AuthAuthenticated extends AuthState {
   final UserEntity user;
-  const AuthAuthenticated(this.user);
+  final bool isLoading;
+  const AuthAuthenticated(this.user, {this.isLoading = false});
   @override
-  List<Object?> get props => [user];
+  List<Object?> get props => [user, isLoading];
+}
+
+class AuthUpdateSuccess extends AuthAuthenticated {
+  const AuthUpdateSuccess(super.user);
 }
 
 class AuthUnauthenticated extends AuthState {}
 
-class AuthRegistrationSuccess extends AuthState {
-  final UserEntity user;
-  const AuthRegistrationSuccess(this.user);
-  @override
-  List<Object?> get props => [user];
+class AuthRegistrationSuccess extends AuthAuthenticated {
+  const AuthRegistrationSuccess(super.user);
 }
 
-class AuthProfileSetupSuccess extends AuthState {
-  final UserEntity user;
-  const AuthProfileSetupSuccess(this.user);
-  @override
-  List<Object?> get props => [user];
+class AuthProfileSetupSuccess extends AuthAuthenticated {
+  const AuthProfileSetupSuccess(super.user);
 }
 
 class AuthOnboardingStageResolved extends AuthState {

@@ -38,14 +38,21 @@ class _LocationSharingScreenState extends State<LocationSharingScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Share Location', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 18)),
+        title: const Text(
+          'Share Location',
+          style: TextStyle(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
-          onPressed: () => context.pop(),
-        ),
+        // leading: IconButton(
+        //   icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+        //   onPressed: () => context.pop(),
+        // ),
       ),
       body: SafeArea(
         child: Padding(
@@ -53,12 +60,22 @@ class _LocationSharingScreenState extends State<LocationSharingScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Your Live Coordinates', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+              const Text(
+                'Your Live Coordinates',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
               const SizedBox(height: 12),
-              
+
               // Coordinates Chip
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(color: AppColors.border),
@@ -70,12 +87,20 @@ class _LocationSharingScreenState extends State<LocationSharingScreen> {
                     Icon(Icons.location_on, color: AppColors.primary, size: 20),
                     const SizedBox(width: 8),
                     // TODO: Replace with real GPS data when Google APIs are available
-                    const Text('LAT:--.- N|LONG:--.- W', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary, letterSpacing: 0.5)),
+                    const Text(
+                      'LAT:--.- N|LONG:--.- W',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
                   ],
                 ),
               ),
               const SizedBox(height: 16),
-              
+
               // Info Banner
               Container(
                 padding: const EdgeInsets.all(16),
@@ -88,39 +113,62 @@ class _LocationSharingScreenState extends State<LocationSharingScreen> {
                   children: [
                     Container(
                       margin: const EdgeInsets.only(top: 4),
-                      width: 8, height: 8,
-                      decoration: const BoxDecoration(color: AppColors.error, shape: BoxShape.circle),
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        color: AppColors.error,
+                        shape: BoxShape.circle,
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        'Your real time coordinates will be sent to all your trusted contacts. This will allow them follow your movement until you stop sharing.', 
-                        style: TextStyle(color: AppColors.error.withValues(alpha: 0.9), fontSize: 13, height: 1.4),
+                        'Your real time coordinates will be sent to all your trusted contacts. This will allow them follow your movement until you stop sharing.',
+                        style: TextStyle(
+                          color: AppColors.error.withValues(alpha: 0.9),
+                          fontSize: 13,
+                          height: 1.4,
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 24),
-              
-              const Text('Recipients', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+
+              const Text(
+                'Recipients',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
               const SizedBox(height: 12),
               _buildAvatarStack(7), // Rendering dummy 7 avatars
-              
+
               const SizedBox(height: 24),
-              const Text('Location Share History', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+              const Text(
+                'Location Share History',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
               const SizedBox(height: 12),
-              
+
               Expanded(
                 child: ListView.separated(
                   itemCount: 4, // dummy history count
-                  separatorBuilder: (_, __) => const Divider(height: 24, color: AppColors.border),
+                  separatorBuilder: (_, __) =>
+                      const Divider(height: 24, color: AppColors.border),
                   itemBuilder: (context, index) {
                     return _buildHistoryRow(index);
                   },
                 ),
               ),
-              
+
               const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
@@ -128,11 +176,22 @@ class _LocationSharingScreenState extends State<LocationSharingScreen> {
                 child: ElevatedButton(
                   onPressed: _toggleSharing,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _isSharing ? AppColors.error : AppColors.primary,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    backgroundColor: _isSharing
+                        ? AppColors.error
+                        : AppColors.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                     elevation: 0,
                   ),
-                  child: Text(_isSharing ? 'Stop Sharing' : 'Share Location', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                  child: Text(
+                    _isSharing ? 'Stop Sharing' : 'Share Location',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -151,19 +210,37 @@ class _LocationSharingScreenState extends State<LocationSharingScreen> {
     final displayCount = totalCount > maxDisplay ? maxDisplay : totalCount;
     final List<Widget> avatars = [];
 
-    final colors = [Colors.purple, Colors.orange, Colors.teal, Colors.blue, Colors.pink];
+    final colors = [
+      Colors.purple,
+      Colors.orange,
+      Colors.teal,
+      Colors.blue,
+      Colors.pink,
+    ];
 
     for (int i = 0; i < displayCount; i++) {
       avatars.add(
         Positioned(
           left: i * 28.0,
           child: Container(
-            padding: const EdgeInsets.all(2), // White border effect bridging stack
-            decoration: const BoxDecoration(color: AppColors.background, shape: BoxShape.circle),
+            padding: const EdgeInsets.all(
+              2,
+            ), // White border effect bridging stack
+            decoration: const BoxDecoration(
+              color: AppColors.background,
+              shape: BoxShape.circle,
+            ),
             child: CircleAvatar(
               radius: 18,
               backgroundColor: colors[i % colors.length].withValues(alpha: 0.2),
-              child: Text('C${i+1}', style: TextStyle(color: colors[i % colors.length], fontSize: 12, fontWeight: FontWeight.bold)),
+              child: Text(
+                'C${i + 1}',
+                style: TextStyle(
+                  color: colors[i % colors.length],
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ),
         ),
@@ -177,11 +254,21 @@ class _LocationSharingScreenState extends State<LocationSharingScreen> {
           left: maxDisplay * 28.0,
           child: Container(
             padding: const EdgeInsets.all(2),
-            decoration: const BoxDecoration(color: AppColors.background, shape: BoxShape.circle),
+            decoration: const BoxDecoration(
+              color: AppColors.background,
+              shape: BoxShape.circle,
+            ),
             child: CircleAvatar(
               radius: 18,
               backgroundColor: AppColors.surfaceGrey,
-              child: Text('+$remaining', style: const TextStyle(color: AppColors.textPrimary, fontSize: 12, fontWeight: FontWeight.bold)),
+              child: Text(
+                '+$remaining',
+                style: const TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ),
         ),
@@ -192,7 +279,8 @@ class _LocationSharingScreenState extends State<LocationSharingScreen> {
       height: 40,
       width: (displayCount * 28.0) + (totalCount > maxDisplay ? 40.0 : 12.0),
       child: Stack(
-        children: avatars.reversed.toList(), // Reverse to have the first ones on top
+        children: avatars.reversed
+            .toList(), // Reverse to have the first ones on top
       ),
     );
   }
@@ -203,20 +291,42 @@ class _LocationSharingScreenState extends State<LocationSharingScreen> {
         CircleAvatar(
           radius: 20,
           backgroundColor: AppColors.primary.withValues(alpha: 0.2),
-          child: const Text('LA', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+          child: const Text(
+            'LA',
+            style: TextStyle(
+              color: AppColors.primary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
         const SizedBox(width: 12),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Location Alert ${index + 1}', style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary, fontSize: 15)),
+              Text(
+                'Location Alert ${index + 1}',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                  fontSize: 15,
+                ),
+              ),
               const SizedBox(height: 4),
-              const Text('LAT:--.- N|LONG:--.- W', style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+              const Text(
+                'LAT:--.- N|LONG:--.- W',
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+              ),
             ],
           ),
         ),
-        Text('Yesterday, 4:50pm', style: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.7), fontSize: 12)),
+        Text(
+          'Yesterday, 4:50pm',
+          style: TextStyle(
+            color: AppColors.textSecondary.withValues(alpha: 0.7),
+            fontSize: 12,
+          ),
+        ),
       ],
     );
   }

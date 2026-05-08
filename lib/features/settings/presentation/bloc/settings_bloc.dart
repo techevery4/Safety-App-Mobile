@@ -34,18 +34,23 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   Future<void> _onUpdateSettings(UpdateSettingsEvent event, Emitter<SettingsState> emit) async {
     if (state is SettingsLoaded) {
       final currentState = state as SettingsLoaded;
-      final newSettings = currentState.settings.copyWith(
-        locationSharingEnabled: event.locationSharingEnabled,
-        shakeTriggerEnabled: event.shakeTriggerEnabled,
-        alarmSoundEnabled: event.alarmSoundEnabled,
-        autoReroutingEnabled: event.autoReroutingEnabled,
+      final originalSettings = currentState.settings;
+      final newSettings = originalSettings.copyWith(
+        emergencySharing: event.emergencySharing,
+        shakeTrigger: event.shakeTrigger,
+        alarmSound: event.alarmSound,
+        autoRerouting: event.autoRerouting,
       );
+      
+      // Optimistically update UI
+      emit(SettingsLoaded(newSettings));
       
       try {
         await repository.updateSettings(newSettings);
-        emit(SettingsLoaded(newSettings));
       } catch (e) {
-        emit(SettingsError(e.toString()));
+        // Revert to original settings and emit transient error for toast
+        emit(SettingsUpdateFailed(e.toString()));
+        emit(SettingsLoaded(originalSettings));
       }
     }
   }

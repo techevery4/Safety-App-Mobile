@@ -1,16 +1,16 @@
 abstract class SettingsEvent {}
 class LoadSettingsEvent extends SettingsEvent {}
 class UpdateSettingsEvent extends SettingsEvent {
-  final bool? locationSharingEnabled;
-  final bool? shakeTriggerEnabled;
-  final bool? alarmSoundEnabled;
-  final bool? autoReroutingEnabled;
+  final bool? emergencySharing;
+  final bool? shakeTrigger;
+  final bool? alarmSound;
+  final bool? autoRerouting;
 
   UpdateSettingsEvent({
-    this.locationSharingEnabled,
-    this.shakeTriggerEnabled,
-    this.alarmSoundEnabled,
-    this.autoReroutingEnabled,
+    this.emergencySharing,
+    this.shakeTrigger,
+    this.alarmSound,
+    this.autoRerouting,
   });
 }
 class ChangePasswordRequested extends SettingsEvent {

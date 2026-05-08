@@ -7,7 +7,9 @@ class LoggingInterceptor extends Interceptor {
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    _logger.i('REQUEST[${options.method}] => PATH: ${options.path}');
+    _logger.i(
+      'REQUEST[${options.method}] => PATH: ${options.path} => ALL: ${options.data}',
+    );
     handler.next(options);
   }
 
