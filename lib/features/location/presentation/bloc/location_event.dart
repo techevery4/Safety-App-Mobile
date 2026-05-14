@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:geolocator/geolocator.dart';
 
 abstract class LocationEvent extends Equatable {
   const LocationEvent();
@@ -7,3 +8,14 @@ abstract class LocationEvent extends Equatable {
 }
 
 class LocationLoadRequested extends LocationEvent {}
+
+class StartLocationTrackingEvent extends LocationEvent {}
+
+class StopLocationTrackingEvent extends LocationEvent {}
+
+class LocationUpdatedEvent extends LocationEvent {
+  final Position position;
+  const LocationUpdatedEvent(this.position);
+  @override
+  List<Object?> get props => [position];
+}

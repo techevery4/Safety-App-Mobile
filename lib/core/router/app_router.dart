@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:roamsafe/features/emergency/presentation/bloc/emergency_bloc.dart';
 import 'app_routes.dart';
 import '../di/injection.dart';
+import 'navigator_key.dart';
 import '../../features/auth/presentation/pages/splash_screen.dart';
 import '../../features/auth/presentation/pages/onboarding_screen.dart';
 import '../../features/auth/presentation/pages/register_screen.dart';
@@ -40,6 +42,7 @@ class AppRouter {
   AppRouter._();
 
   static final GoRouter router = GoRouter(
+    navigatorKey: navigatorKey,
     initialLocation: '/',
     routes: [
       GoRoute(
@@ -90,7 +93,10 @@ class AppRouter {
       GoRoute(
         path: '/emergency-active',
         name: AppRoutes.emergencyActive,
-        builder: (context, state) => const EmergencyActiveScreen(),
+        builder: (context, state) {
+          final autoCall = state.extra as bool? ?? false;
+          return EmergencyActiveScreen(autoCall: autoCall);
+        },
       ),
       GoRoute(
         path: '/emergency-triggered',
@@ -188,11 +194,7 @@ class AppRouter {
         builder: (context, state) => const ChangePasswordSuccessScreen(),
       ),
     ],
-    errorBuilder: (context, state) => Scaffold(
-      body: Center(
-        child: Text('Page not found: ${state.uri}'),
-      ),
-    ),
+    errorBuilder: (context, state) =>
+        Scaffold(body: Center(child: Text('Page not found: ${state.uri}'))),
   );
 }
-

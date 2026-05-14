@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
-
 import '../../../../core/router/app_routes.dart';
 import '../../../dashboard/presentation/widgets/bottom_nav_bar.dart';
+import '../bloc/location_bloc.dart';
+import '../bloc/location_event.dart';
+import '../bloc/location_state.dart';
 
 class LocationSharingScreen extends StatefulWidget {
   const LocationSharingScreen({super.key});
@@ -13,13 +16,15 @@ class LocationSharingScreen extends StatefulWidget {
 }
 
 class _LocationSharingScreenState extends State<LocationSharingScreen> {
-  bool _isSharing = false;
 
   void _toggleSharing() {
-    // TODO: Request permission, dispatch ShareLocationEvent to LocationBloc
-    setState(() {
-      _isSharing = !_isSharing;
-    });
+    final bloc = context.read<LocationBloc>();
+    final state = bloc.state;
+    if (state is LocationLoaded && state.isSharing) {
+      bloc.add(StopLocationTrackingEvent());
+    } else {
+      bloc.add(StartLocationTrackingEvent());
+    }
   }
 
   void _onNavTap(int index) {
@@ -49,10 +54,6 @@ class _LocationSharingScreenState extends State<LocationSharingScreen> {
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
-        // leading: IconButton(
-        //   icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
-        //   onPressed: () => context.pop(),
-        // ),
       ),
       body: SafeArea(
         child: Padding(
@@ -70,34 +71,42 @@ class _LocationSharingScreenState extends State<LocationSharingScreen> {
               ),
               const SizedBox(height: 12),
 
-              // Coordinates Chip
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 10,
-                ),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: AppColors.border),
-                  color: Colors.white,
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.location_on, color: AppColors.primary, size: 20),
-                    const SizedBox(width: 8),
-                    // TODO: Replace with real GPS data when Google APIs are available
-                    const Text(
-                      'LAT:--.- N|LONG:--.- W',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                        letterSpacing: 0.5,
-                      ),
+              // Coordinates Chip — now with real GPS data
+              BlocBuilder<LocationBloc, LocationState>(
+                builder: (context, state) {
+                  final coords = state is LocationLoaded
+                      ? state.formattedCoordinates
+                      : 'Acquiring location...';
+                  return Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
                     ),
-                  ],
-                ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: AppColors.border),
+                      color: Colors.white,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.location_on, color: AppColors.primary, size: 20),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            coords,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 16),
 
@@ -170,29 +179,34 @@ class _LocationSharingScreenState extends State<LocationSharingScreen> {
               ),
 
               const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: _toggleSharing,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _isSharing
-                        ? AppColors.error
-                        : AppColors.primary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+              BlocBuilder<LocationBloc, LocationState>(
+                builder: (context, state) {
+                  final isSharing = state is LocationLoaded && state.isSharing;
+                  return SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: ElevatedButton(
+                      onPressed: _toggleSharing,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: isSharing
+                            ? AppColors.error
+                            : AppColors.primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: Text(
+                        isSharing ? 'Stop Sharing' : 'Share Location',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
-                    elevation: 0,
-                  ),
-                  child: Text(
-                    _isSharing ? 'Stop Sharing' : 'Share Location',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
+                  );
+                },
               ),
             ],
           ),
@@ -313,9 +327,16 @@ class _LocationSharingScreenState extends State<LocationSharingScreen> {
                 ),
               ),
               const SizedBox(height: 4),
-              const Text(
-                'LAT:--.- N|LONG:--.- W',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+              BlocBuilder<LocationBloc, LocationState>(
+                builder: (context, state) {
+                  final coords = state is LocationLoaded
+                      ? state.formattedCoordinates
+                      : 'LAT:--.- N|LONG:--.- W';
+                  return Text(
+                    coords,
+                    style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                  );
+                },
               ),
             ],
           ),

@@ -57,7 +57,14 @@
 		<array>
 			<string>tel</string>
 		</array>
-		<key>UIStatusBarHidden</key>
+	<key>UIStatusBarHidden</key>
 		<false/>
+		<key>UIBackgroundModes</key>
+		<array>
+			<string>fetch</string>
+			<string>location</string>
+			<string>audio</string>
+			<string>remote-notification</string>
+		</array>
 	</dict>
 </plist>

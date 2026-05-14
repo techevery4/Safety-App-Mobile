@@ -5,6 +5,7 @@ import 'package:roamsafe/core/services/calling/call_service.dart';
 import 'package:roamsafe/core/services/alarm/alarm_service.dart';
 import 'package:roamsafe/core/services/shake/shake_detection_service.dart';
 import 'package:roamsafe/core/services/location/location_service.dart';
+import 'package:roamsafe/core/services/region/region_service.dart';
 import 'package:roamsafe/core/services/storage/secure_storage_service.dart';
 import 'package:roamsafe/core/services/storage/local_storage_service.dart';
 import 'package:roamsafe/core/services/storage/onboarding_storage_service.dart';
@@ -40,6 +41,7 @@ import 'package:roamsafe/features/advertising/domain/usecases/get_active_ads_use
 import 'package:roamsafe/features/advertising/domain/usecases/create_ad_usecase.dart';
 import 'package:roamsafe/features/profile/domain/repositories/profile_repository.dart';
 import 'package:roamsafe/features/profile/data/repositories/profile_repository_impl.dart';
+import 'package:roamsafe/features/location/presentation/bloc/location_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Global GetIt service locator instance.
@@ -47,6 +49,9 @@ final GetIt sl = GetIt.instance;
 
 /// Initialise all dependency injection bindings.
 Future<void> configureDependencies() async {
+  // Prevent double-registration when called from background isolate
+  if (sl.isRegistered<SharedPreferences>()) return;
+
   // External
   final sharedPreferences = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => sharedPreferences);
@@ -72,6 +77,7 @@ Future<void> configureDependencies() async {
   sl.registerLazySingleton<AlarmService>(() => AlarmService());
   sl.registerLazySingleton<ShakeDetectionService>(() => ShakeDetectionService());
   sl.registerLazySingleton<LocationService>(() => LocationService());
+  sl.registerLazySingleton<RegionService>(() => RegionService(sl()));
 
   // Auth — Data Sources
   sl.registerLazySingleton<AuthRemoteDataSource>(
@@ -193,5 +199,11 @@ Future<void> configureDependencies() async {
   sl.registerFactory(() => AdsBloc(
     getActiveAdsUseCase: sl(),
     createAdUseCase: sl(),
+  ));
+
+  // LocationBloc — registered as singleton so main.dart can dispatch events
+  // and the same instance is shared with the widget tree
+  sl.registerLazySingleton(() => LocationBloc(
+    locationService: sl(),
   ));
 }

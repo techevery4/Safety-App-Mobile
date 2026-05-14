@@ -15,6 +15,10 @@ import '../../../ads/presentation/bloc/ads_event.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../../auth/domain/entities/user_entity.dart';
+import '../../../emergency/presentation/bloc/emergency_bloc.dart';
+import '../../../emergency/presentation/bloc/emergency_event.dart';
+
+import 'package:flutter_background_service/flutter_background_service.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -24,6 +28,20 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   int _currentNavIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _startBackgroundService();
+  }
+
+  Future<void> _startBackgroundService() async {
+    final service = FlutterBackgroundService();
+    var isRunning = await service.isRunning();
+    if (!isRunning) {
+      service.startService();
+    }
+  }
 
   void _onNavTap(int index) {
     if (index == 0) return;
@@ -41,7 +59,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void _onSOSTapped() {
-    context.pushNamed(AppRoutes.emergencyActive);
+    context.read<EmergencyBloc>().add(TriggerEmergencyEvent());
+    context.pushNamed(AppRoutes.emergencyActive, extra: false);
   }
 
   @override

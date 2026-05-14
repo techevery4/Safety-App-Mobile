@@ -1,15 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:roamsafe/core/constants/app_colors.dart';
 import 'package:roamsafe/core/router/app_routes.dart';
 import 'package:roamsafe/core/services/calling/call_service.dart';
+import 'package:roamsafe/core/services/region/region_service.dart';
 import 'package:roamsafe/core/di/injection.dart';
 import 'package:roamsafe/features/emergency/presentation/bloc/emergency_bloc.dart';
 import 'package:roamsafe/features/emergency/presentation/bloc/emergency_event.dart';
+import 'package:roamsafe/features/location/presentation/bloc/location_bloc.dart';
+import 'package:roamsafe/features/location/presentation/bloc/location_state.dart';
 
 class EmergencyActiveScreen extends StatefulWidget {
-  const EmergencyActiveScreen({super.key});
+  final bool autoCall;
+
+  const EmergencyActiveScreen({
+    super.key,
+    this.autoCall = false,
+  });
 
   @override
   State<EmergencyActiveScreen> createState() => _EmergencyActiveScreenState();
@@ -17,12 +26,29 @@ class EmergencyActiveScreen extends StatefulWidget {
 
 class _EmergencyActiveScreenState extends State<EmergencyActiveScreen> {
   final CallService _callService = sl<CallService>();
+  late final EmergencyNumbers _numbers;
 
   @override
   void initState() {
     super.initState();
-    // Alarm triggers automatically via the Bloc logic/trigger event elsewhere,
-    // but we can ensure the emergency state is active here if needed.
+    _numbers = sl<RegionService>().getEmergencyNumbers();
+    
+    if (widget.autoCall) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _openDialler();
+      });
+    }
+  }
+
+  Future<void> _openDialler() async {
+    try {
+      final uri = Uri(scheme: 'tel', path: _numbers.primary);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri);
+      }
+    } catch (e) {
+      debugPrint('❌ Failed to open dialler: $e');
+    }
   }
 
   void _stopEmergency() {
@@ -34,6 +60,16 @@ class _EmergencyActiveScreenState extends State<EmergencyActiveScreen> {
     _callService.call(number);
   }
 
+  String _formatLastPing(DateTime? lastUpdated) {
+    if (lastUpdated == null) return 'Last ping: --';
+    final diff = DateTime.now().difference(lastUpdated);
+    if (diff.inSeconds < 60) {
+      return 'Last ping: ${diff.inSeconds}s ago';
+    } else {
+      return 'Last ping: ${diff.inMinutes}m ago';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -41,49 +77,75 @@ class _EmergencyActiveScreenState extends State<EmergencyActiveScreen> {
       child: Scaffold(
         backgroundColor: AppColors.background,
         body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildRedAlertBanner(),
-                const SizedBox(height: 12),
-                _buildLocationSharingBanner(),
-                const SizedBox(height: 24),
-                
-                const Text('Live Coordinates', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
-                const SizedBox(height: 8),
-                const Text('LAT:--.- |LONG:--.-', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: AppColors.textPrimary, letterSpacing: 1.5)),
-                // TODO: replace with real GPS data
-                const Text('Last ping: --s ago', style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
-                
-                const SizedBox(height: 32),
-                
-                Row(
-                  children: [
-                    Expanded(child: _buildCallButton('112', 'Call 112')),
-                    const SizedBox(width: 16),
-                    Expanded(child: _buildCallButton('767', 'Call LASEMA')),
-                  ],
-                ),
-                
-                const SizedBox(height: 32),
-                
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Emergency Contacts', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
-                    GestureDetector(
-                      onTap: () => context.pushNamed(AppRoutes.contacts),
-                      child: const Text('View All', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.primary)),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                
-                Expanded(
-                  // Reading from a stubbed state, so we render placeholders if the list isn't present
-                  child: ListView.separated(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildRedAlertBanner(),
+                  const SizedBox(height: 12),
+                  _buildLocationSharingBanner(),
+                  const SizedBox(height: 24),
+                  
+                  const Text('Live Coordinates', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                  const SizedBox(height: 8),
+                  BlocBuilder<LocationBloc, LocationState>(
+                    builder: (context, state) {
+                      final coords = state is LocationLoaded
+                          ? state.formattedCoordinates
+                          : 'Acquiring location...';
+                      final lastPing = state is LocationLoaded
+                          ? _formatLastPing(state.lastUpdated)
+                          : 'Last ping: --';
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            coords,
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w900,
+                              color: AppColors.textPrimary,
+                              letterSpacing: 1.5,
+                            ),
+                          ),
+                          Text(
+                            lastPing,
+                            style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                  
+                  const SizedBox(height: 32),
+                  
+                  Row(
+                    children: [
+                      Expanded(child: _buildCallButton(_numbers.primary, 'Call ${_numbers.primary}')),
+                      const SizedBox(width: 16),
+                      Expanded(child: _buildCallButton(_numbers.secondary, 'Call ${_numbers.secondaryName}')),
+                    ],
+                  ),
+                  
+                  const SizedBox(height: 32),
+                  
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Emergency Contacts', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                      GestureDetector(
+                        onTap: () => context.pushNamed(AppRoutes.contacts),
+                        child: const Text('View All', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.primary)),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
                     itemCount: 3,
                     separatorBuilder: (_, __) => const SizedBox(height: 12),
                     itemBuilder: (context, index) {
@@ -95,23 +157,23 @@ class _EmergencyActiveScreenState extends State<EmergencyActiveScreen> {
                       );
                     },
                   ),
-                ),
-                
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  height: 56,
-                  child: ElevatedButton(
-                    onPressed: _stopEmergency,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      elevation: 0,
+                  
+                  const SizedBox(height: 32),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: ElevatedButton(
+                      onPressed: _stopEmergency,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        elevation: 0,
+                      ),
+                      child: const Text('Stop Emergency Alert', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
                     ),
-                    child: const Text('Stop Emergency Alert', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

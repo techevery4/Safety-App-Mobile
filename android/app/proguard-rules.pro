@@ -1,0 +1,5 @@
+-keep class id.flutter.flutter_background_service.** { *; }
+-keep class dev.fluttercommunity.workmanager.** { *; }
+-keep class com.plugin.flutter.android_intent_plus.** { *; }
+-dontwarn id.flutter.flutter_background_service.**
+-dontwarn com.plugin.flutter.android_intent_plus.**
